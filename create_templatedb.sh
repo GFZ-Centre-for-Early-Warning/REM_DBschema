@@ -11,3 +11,6 @@ psql $1 -f ./taxonomy.sql
 psql $1 -f ./survey.sql
 psql $1 -f ./asset.sql
 psql $1 -f ./image.sql
+
+#add history logging schema
+psql $1 -f ./history.sql
