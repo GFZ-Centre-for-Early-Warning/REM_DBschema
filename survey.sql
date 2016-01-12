@@ -197,6 +197,9 @@ SELECT pg_catalog.setval('survey_gid_seq', 1, false);
 --
 
 COPY survey_type (gid, code, description) FROM stdin;
+1	RRVS	Remote Rapid Visual Survey
+3	OTH	Other (unspecified)
+2	IDCT	Inventory Data Capture Tool
 \.
 
 
