@@ -252,6 +252,71 @@ SET default_tablespace = '';
 SET default_with_oids = false;
 
 --
+-- Name: object; Type: TABLE; Schema: asset; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE object (
+    gid integer NOT NULL,
+    survey_gid integer,
+    description character varying(254),
+    source text,
+    accuracy numeric,
+    the_geom public.geometry
+);
+
+
+ALTER TABLE asset.object OWNER TO postgres;
+
+--
+-- Name: TABLE object; Type: COMMENT; Schema: asset; Owner: postgres
+--
+
+COMMENT ON TABLE object IS 'The object table (e.g. per building scale). Contains basic information about the object.';
+
+
+--
+-- Name: COLUMN object.gid; Type: COMMENT; Schema: asset; Owner: postgres
+--
+
+COMMENT ON COLUMN object.gid IS 'Unique object identifier';
+
+
+--
+-- Name: COLUMN object.survey_gid; Type: COMMENT; Schema: asset; Owner: postgres
+--
+
+COMMENT ON COLUMN object.survey_gid IS 'Identifier for the survey';
+
+
+--
+-- Name: COLUMN object.description; Type: COMMENT; Schema: asset; Owner: postgres
+--
+
+COMMENT ON COLUMN object.description IS 'Textual description of the object';
+
+
+--
+-- Name: COLUMN object.source; Type: COMMENT; Schema: asset; Owner: postgres
+--
+
+COMMENT ON COLUMN object.source IS 'Source of the object (geometry)';
+
+
+--
+-- Name: COLUMN object.accuracy; Type: COMMENT; Schema: asset; Owner: postgres
+--
+
+COMMENT ON COLUMN object.accuracy IS 'Accuracy of the object (geometry)';
+
+
+--
+-- Name: COLUMN object.the_geom; Type: COMMENT; Schema: asset; Owner: postgres
+--
+
+COMMENT ON COLUMN object.the_geom IS 'Spatial reference and geometry information';
+
+
+--
 -- Name: object_attribute; Type: TABLE; Schema: asset; Owner: postgres; Tablespace: 
 --
 
@@ -437,71 +502,6 @@ ALTER TABLE asset.object_attribute_qualifier_gid_seq OWNER TO postgres;
 --
 
 ALTER SEQUENCE object_attribute_qualifier_gid_seq OWNED BY object_attribute_qualifier.gid;
-
-
---
--- Name: object; Type: TABLE; Schema: asset; Owner: postgres; Tablespace: 
---
-
-CREATE TABLE object (
-    gid integer NOT NULL,
-    survey_gid integer,
-    description character varying(254),
-    source text,
-    accuracy numeric,
-    the_geom public.geometry
-);
-
-
-ALTER TABLE asset.object OWNER TO postgres;
-
---
--- Name: TABLE object; Type: COMMENT; Schema: asset; Owner: postgres
---
-
-COMMENT ON TABLE object IS 'The object table (e.g. per building scale). Contains basic information about the object.';
-
-
---
--- Name: COLUMN object.gid; Type: COMMENT; Schema: asset; Owner: postgres
---
-
-COMMENT ON COLUMN object.gid IS 'Unique object identifier';
-
-
---
--- Name: COLUMN object.survey_gid; Type: COMMENT; Schema: asset; Owner: postgres
---
-
-COMMENT ON COLUMN object.survey_gid IS 'Identifier for the survey';
-
-
---
--- Name: COLUMN object.description; Type: COMMENT; Schema: asset; Owner: postgres
---
-
-COMMENT ON COLUMN object.description IS 'Textual description of the object';
-
-
---
--- Name: COLUMN object.source; Type: COMMENT; Schema: asset; Owner: postgres
---
-
-COMMENT ON COLUMN object.source IS 'Source of the object (geometry)';
-
-
---
--- Name: COLUMN object.accuracy; Type: COMMENT; Schema: asset; Owner: postgres
---
-
-COMMENT ON COLUMN object.accuracy IS 'Accuracy of the object (geometry)';
-
-
---
--- Name: COLUMN object.the_geom; Type: COMMENT; Schema: asset; Owner: postgres
---
-
-COMMENT ON COLUMN object.the_geom IS 'Spatial reference and geometry information';
 
 
 --
@@ -749,10 +749,34 @@ ALTER TABLE ONLY ve_object ALTER COLUMN foundn_sys SET DEFAULT 'FOS99'::characte
 
 
 --
+-- Data for Name: object; Type: TABLE DATA; Schema: asset; Owner: postgres
+--
+
+COPY object (gid, survey_gid, description, source, accuracy, the_geom) FROM stdin;
+\.
+
+
+--
+-- Data for Name: object_attribute; Type: TABLE DATA; Schema: asset; Owner: postgres
+--
+
+COPY object_attribute (gid, object_id, attribute_type_code, attribute_value, attribute_numeric_1, attribute_numeric_2, attribute_text_1) FROM stdin;
+\.
+
+
+--
 -- Name: object_attribute_gid_seq; Type: SEQUENCE SET; Schema: asset; Owner: postgres
 --
 
 SELECT pg_catalog.setval('object_attribute_gid_seq', 54000, true);
+
+
+--
+-- Data for Name: object_attribute_qualifier; Type: TABLE DATA; Schema: asset; Owner: postgres
+--
+
+COPY object_attribute_qualifier (gid, attribute_id, qualifier_type_code, qualifier_value, qualifier_numeric_1, qualifier_text_1, qualifier_timestamp_1) FROM stdin;
+\.
 
 
 --
@@ -770,27 +794,11 @@ SELECT pg_catalog.setval('object_gid_seq', 2000, true);
 
 
 --
--- Data for Name: object; Type: TABLE DATA; Schema: asset; Owner: postgres
+-- Name: pk_object; Type: CONSTRAINT; Schema: asset; Owner: postgres; Tablespace: 
 --
 
-COPY object (gid, survey_gid, description, source, accuracy, the_geom) FROM stdin;
-\.
-
-
---
--- Data for Name: object_attribute; Type: TABLE DATA; Schema: asset; Owner: postgres
---
-
-COPY object_attribute (gid, object_id, attribute_type_code, attribute_value, attribute_numeric_1, attribute_numeric_2, attribute_text_1) FROM stdin;
-\.
-
-
---
--- Data for Name: object_attribute_qualifier; Type: TABLE DATA; Schema: asset; Owner: postgres
---
-
-COPY object_attribute_qualifier (gid, attribute_id, qualifier_type_code, qualifier_value, qualifier_numeric_1, qualifier_text_1, qualifier_timestamp_1) FROM stdin;
-\.
+ALTER TABLE ONLY object_attribute
+    ADD CONSTRAINT pk_object PRIMARY KEY (gid);
 
 
 --
@@ -810,18 +818,10 @@ ALTER TABLE ONLY object_attribute_qualifier
 
 
 --
--- Name: pk_object; Type: CONSTRAINT; Schema: asset; Owner: postgres; Tablespace: 
+-- Name: idx_object; Type: INDEX; Schema: asset; Owner: postgres; Tablespace: 
 --
 
-ALTER TABLE ONLY object_attribute
-    ADD CONSTRAINT pk_object PRIMARY KEY (gid);
-
-
---
--- Name: idx_object_attribute_value; Type: INDEX; Schema: asset; Owner: postgres; Tablespace: 
---
-
-CREATE INDEX idx_object_attribute_value ON object_attribute USING btree (attribute_value);
+CREATE INDEX idx_object ON object USING btree (survey_gid);
 
 
 --
@@ -853,10 +853,10 @@ CREATE INDEX idx_object_attribute_qualifier_1 ON object_attribute_qualifier USIN
 
 
 --
--- Name: idx_object; Type: INDEX; Schema: asset; Owner: postgres; Tablespace: 
+-- Name: idx_object_attribute_value; Type: INDEX; Schema: asset; Owner: postgres; Tablespace: 
 --
 
-CREATE INDEX idx_object ON object USING btree (survey_gid);
+CREATE INDEX idx_object_attribute_value ON object_attribute USING btree (attribute_value);
 
 
 --
@@ -874,7 +874,7 @@ CREATE TRIGGER object_trigger INSTEAD OF INSERT OR DELETE OR UPDATE ON ve_object
 
 
 --
--- Name: fk_atribute_gid; Type: FK CONSTRAINT; Schema: asset; Owner: postgres
+-- Name: fk_attribute_gid; Type: FK CONSTRAINT; Schema: asset; Owner: postgres
 --
 
 ALTER TABLE ONLY object_attribute_qualifier
