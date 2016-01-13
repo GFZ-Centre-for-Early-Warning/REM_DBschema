@@ -48,7 +48,8 @@ CREATE TABLE gpano_metadata (
     fullpanoheightpixels integer NOT NULL,
     croppedarealeftpixels integer NOT NULL,
     croppedareatoppixels integer NOT NULL,
-    initialcameradolly real DEFAULT 0
+    initialcameradolly real DEFAULT 0,
+    fullpanowidthpixels integer NOT NULL
 );
 
 
@@ -206,6 +207,13 @@ COMMENT ON COLUMN gpano_metadata.croppedareatoppixels IS 'Row where the top edge
 --
 
 COMMENT ON COLUMN gpano_metadata.initialcameradolly IS 'This optional parameter moves the virtual camera position along the line of sight, away from the center of the photo sphere. A rear surface position is represented by the value -1.0, while a front surface position is represented by 1.0. For normal viewing, this parameter should be set to 0.';
+
+
+--
+-- Name: COLUMN gpano_metadata.fullpanowidthpixels; Type: COMMENT; Schema: image; Owner: postgres
+--
+
+COMMENT ON COLUMN gpano_metadata.fullpanowidthpixels IS 'Original full width from which the image was cropped. If only a partial photo sphere was captured, this specifies the width of what the full photo sphere would have been.';
 
 
 --
@@ -461,7 +469,7 @@ ALTER TABLE ONLY image_type ALTER COLUMN gid SET DEFAULT nextval('image_type_gid
 -- Data for Name: gpano_metadata; Type: TABLE DATA; Schema: image; Owner: postgres
 --
 
-COPY gpano_metadata (gid, usepanoramaviewer, capturesoftware, stichingsoftware, projectiontype, poseheadingdegrees, posepitchdegrees, poserolldegrees, initialviewheadingdegrees, initialviewpitchdegrees, initialviewrolldegrees, initialhorizontalfovdegrees, firstphotodate, sourcephotoscount, exposurelockused, croppedareaimagewidthpixels, croppedareaimageheightpixels, fullpanoheightpixels, croppedarealeftpixels, croppedareatoppixels, initialcameradolly) FROM stdin;
+COPY gpano_metadata (gid, usepanoramaviewer, capturesoftware, stichingsoftware, projectiontype, poseheadingdegrees, posepitchdegrees, poserolldegrees, initialviewheadingdegrees, initialviewpitchdegrees, initialviewrolldegrees, initialhorizontalfovdegrees, firstphotodate, sourcephotoscount, exposurelockused, croppedareaimagewidthpixels, croppedareaimageheightpixels, fullpanoheightpixels, croppedarealeftpixels, croppedareatoppixels, initialcameradolly, fullpanowidthpixels) FROM stdin;
 \.
 
 
