@@ -1,0 +1,6 @@
+#temporary edited files
+*~
+#compressed files
+*.gz
+*.zip
+*.tar
