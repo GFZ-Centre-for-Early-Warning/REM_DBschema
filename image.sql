@@ -28,10 +28,10 @@ SET default_with_oids = false;
 --
 
 CREATE TABLE gpano_metadata (
-    gid integer NOT NULL,
+    gid serial PRIMARY KEY,
     usepanoramaviewer boolean,
     capturesoftware character varying,
-    stichingsoftware character varying,
+    stitchingsoftware character varying,
     projectiontype character varying DEFAULT 'equirectangular'::character varying NOT NULL,
     poseheadingdegrees real,
     posepitchdegrees real DEFAULT 0,
@@ -46,10 +46,10 @@ CREATE TABLE gpano_metadata (
     croppedareaimagewidthpixels integer NOT NULL,
     croppedareaimageheightpixels integer NOT NULL,
     fullpanoheightpixels integer NOT NULL,
+    fullpanowidthpixels integer NOT NULL
     croppedarealeftpixels integer NOT NULL,
     croppedareatoppixels integer NOT NULL,
     initialcameradolly real DEFAULT 0,
-    fullpanowidthpixels integer NOT NULL
 );
 
 
@@ -217,33 +217,11 @@ COMMENT ON COLUMN gpano_metadata.fullpanowidthpixels IS 'Original full width fro
 
 
 --
--- Name: gpano_metadata_gid_seq; Type: SEQUENCE; Schema: image; Owner: postgres
---
-
-CREATE SEQUENCE gpano_metadata_gid_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER TABLE image.gpano_metadata_gid_seq OWNER TO postgres;
-
---
--- Name: gpano_metadata_gid_seq; Type: SEQUENCE OWNED BY; Schema: image; Owner: postgres
---
-
-ALTER SEQUENCE gpano_metadata_gid_seq OWNED BY gpano_metadata.gid;
-
-
---
 -- Name: gps; Type: TABLE; Schema: image; Owner: postgres; Tablespace: 
 --
 
 CREATE TABLE gps (
-    gid integer,
-    img_id integer,
+    gid serial PRIMARY KEY,
     altitude real,
     azimuth real,
     abspeed real,
@@ -357,7 +335,7 @@ ALTER SEQUENCE image_type_gid_seq OWNED BY image_type.gid;
 --
 
 CREATE TABLE img (
-    gid integer,
+    gid serial PRIMARY KEY,
     source text,
     gps integer,
     survey integer,
