@@ -1,4 +1,4 @@
---
+﻿--
 -- PostgreSQL database dump
 --
 
@@ -46,10 +46,10 @@ CREATE TABLE gpano_metadata (
     croppedareaimagewidthpixels integer NOT NULL,
     croppedareaimageheightpixels integer NOT NULL,
     fullpanoheightpixels integer NOT NULL,
-    fullpanowidthpixels integer NOT NULL
+    fullpanowidthpixels integer NOT NULL,
     croppedarealeftpixels integer NOT NULL,
     croppedareatoppixels integer NOT NULL,
-    initialcameradolly real DEFAULT 0,
+    initialcameradolly real DEFAULT 0
 );
 
 
@@ -84,10 +84,10 @@ COMMENT ON COLUMN gpano_metadata.capturesoftware IS 'If capture was done using a
 
 
 --
--- Name: COLUMN gpano_metadata.stichingsoftware; Type: COMMENT; Schema: image; Owner: postgres
+-- Name: COLUMN gpano_metadata.stitchingsoftware; Type: COMMENT; Schema: image; Owner: postgres
 --
 
-COMMENT ON COLUMN gpano_metadata.stichingsoftware IS 'The software that was used to create the final photo sphere. This may sometimes be the same value as that of  GPano:CaptureSoftware.';
+COMMENT ON COLUMN gpano_metadata.stitchingsoftware IS 'The software that was used to create the final photo sphere. This may sometimes be the same value as that of  GPano:CaptureSoftware.';
 
 
 --
@@ -215,6 +215,11 @@ COMMENT ON COLUMN gpano_metadata.initialcameradolly IS 'This optional parameter 
 
 COMMENT ON COLUMN gpano_metadata.fullpanowidthpixels IS 'Original full width from which the image was cropped. If only a partial photo sphere was captured, this specifies the width of what the full photo sphere would have been.';
 
+--
+-- Name: gid; Type: DEFAULT; Schema: image; Owner: postgres
+--
+
+ALTER TABLE ONLY gpano_metadata ALTER COLUMN gid SET DEFAULT nextval('gpano_metadata_gid_seq'::regclass);
 
 --
 -- Name: gps; Type: TABLE; Schema: image; Owner: postgres; Tablespace: 
@@ -280,7 +285,7 @@ COMMENT ON COLUMN gps.lon IS 'longitude, in degrees WGS84 ';
 --
 
 CREATE TABLE image_type (
-    gid integer NOT NULL,
+    gid serial PRIMARY KEY,
     code character varying(50) NOT NULL,
     description character varying(255)
 );
@@ -309,17 +314,6 @@ COMMENT ON COLUMN image_type.code IS 'alfanumeric descriptor of image type';
 COMMENT ON COLUMN image_type.description IS 'short text descriptino of the image type';
 
 
---
--- Name: image_type_gid_seq; Type: SEQUENCE; Schema: image; Owner: postgres
---
-
-CREATE SEQUENCE image_type_gid_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
 
 ALTER TABLE image.image_type_gid_seq OWNER TO postgres;
 
@@ -333,6 +327,28 @@ ALTER SEQUENCE image_type_gid_seq OWNED BY image_type.gid;
 --
 -- Name: img; Type: TABLE; Schema: image; Owner: postgres; Tablespace: 
 --
+
+--
+-- Name: gid; Type: DEFAULT; Schema: image; Owner: postgres
+--
+
+ALTER TABLE ONLY image_type ALTER COLUMN gid SET DEFAULT nextval('image_type_gid_seq'::regclass);
+
+
+--
+-- Data for Name: image_type; Type: TABLE DATA; Schema: image; Owner: postgres
+--
+
+INSERT INTO image.image_type (gid, code, description) VALUES (1,'pano','panoramic or omnidirectional image');
+INSERT INTO image.image_type (gid, code, description) VALUES (2,'pict','generic simple picture');
+
+--
+-- Name: pk_image_type_0; Type: CONSTRAINT; Schema: image; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY image_type
+    ADD CONSTRAINT pk_image_type_0 UNIQUE (code);
+
 
 CREATE TABLE img (
     gid serial PRIMARY KEY,
@@ -428,99 +444,28 @@ COMMENT ON COLUMN img.width IS 'number of columns';
 
 COMMENT ON COLUMN img.height IS 'number of rows';
 
-
 --
--- Name: gid; Type: DEFAULT; Schema: image; Owner: postgres
---
-
-ALTER TABLE ONLY gpano_metadata ALTER COLUMN gid SET DEFAULT nextval('gpano_metadata_gid_seq'::regclass);
-
-
---
--- Name: gid; Type: DEFAULT; Schema: image; Owner: postgres
+-- Name: fk_img_gpano_metadata; Type: FK CONSTRAINT; Schema: image; Owner: postgres
 --
 
-ALTER TABLE ONLY image_type ALTER COLUMN gid SET DEFAULT nextval('image_type_gid_seq'::regclass);
+ALTER TABLE ONLY img
+    ADD CONSTRAINT fk_img_gpano_metadata FOREIGN KEY (gpano) REFERENCES gpano_metadata(gid);
 
 
 --
--- Data for Name: gpano_metadata; Type: TABLE DATA; Schema: image; Owner: postgres
+-- Name: fk_img_gps; Type: FK CONSTRAINT; Schema: image; Owner: postgres
 --
 
-COPY gpano_metadata (gid, usepanoramaviewer, capturesoftware, stichingsoftware, projectiontype, poseheadingdegrees, posepitchdegrees, poserolldegrees, initialviewheadingdegrees, initialviewpitchdegrees, initialviewrolldegrees, initialhorizontalfovdegrees, firstphotodate, sourcephotoscount, exposurelockused, croppedareaimagewidthpixels, croppedareaimageheightpixels, fullpanoheightpixels, croppedarealeftpixels, croppedareatoppixels, initialcameradolly, fullpanowidthpixels) FROM stdin;
-\.
-
-
---
--- Name: gpano_metadata_gid_seq; Type: SEQUENCE SET; Schema: image; Owner: postgres
---
-
-SELECT pg_catalog.setval('gpano_metadata_gid_seq', 1, false);
+ALTER TABLE ONLY img
+    ADD CONSTRAINT fk_img_gps FOREIGN KEY (gps) REFERENCES gps(gid);
 
 
 --
--- Data for Name: gps; Type: TABLE DATA; Schema: image; Owner: postgres
+-- Name: fk_img_image_type; Type: FK CONSTRAINT; Schema: image; Owner: postgres
 --
 
-COPY gps (gid, img_id, altitude, azimuth, abspeed, the_geom, lat, lon) FROM stdin;
-\.
-
-
---
--- Data for Name: image_type; Type: TABLE DATA; Schema: image; Owner: postgres
---
-
-COPY image_type (gid, code, description) FROM stdin;
-2	pict	generic simple picture
-1	pano	panoramic or omnidirectional image
-\.
-
-
---
--- Name: image_type_gid_seq; Type: SEQUENCE SET; Schema: image; Owner: postgres
---
-
-SELECT pg_catalog.setval('image_type_gid_seq', 2, true);
-
-
---
--- Data for Name: img; Type: TABLE DATA; Schema: image; Owner: postgres
---
-
-COPY img (gid, source, gps, survey, "timestamp", filename, type, repository, frame_id, gpano, width, height) FROM stdin;
-\.
-
-
---
--- Name: pk_gpano_metadata; Type: CONSTRAINT; Schema: image; Owner: postgres; Tablespace: 
---
-
-ALTER TABLE ONLY gpano_metadata
-    ADD CONSTRAINT pk_gpano_metadata PRIMARY KEY (gid);
-
-
---
--- Name: pk_gps; Type: CONSTRAINT; Schema: image; Owner: postgres; Tablespace: 
---
-
-ALTER TABLE ONLY gps
-    ADD CONSTRAINT pk_gps UNIQUE (gid);
-
-
---
--- Name: pk_image_type; Type: CONSTRAINT; Schema: image; Owner: postgres; Tablespace: 
---
-
-ALTER TABLE ONLY image_type
-    ADD CONSTRAINT pk_image_type PRIMARY KEY (gid);
-
-
---
--- Name: pk_image_type_0; Type: CONSTRAINT; Schema: image; Owner: postgres; Tablespace: 
---
-
-ALTER TABLE ONLY image_type
-    ADD CONSTRAINT pk_image_type_0 UNIQUE (code);
+ALTER TABLE ONLY img
+    ADD CONSTRAINT fk_img_image_type FOREIGN KEY (type) REFERENCES image_type(code);
 
 
 --
@@ -549,31 +494,6 @@ CREATE INDEX idx_img_1 ON img USING btree (type);
 --
 
 CREATE INDEX idx_img_2 ON img USING btree (gpano);
-
-
---
--- Name: fk_img_gpano_metadata; Type: FK CONSTRAINT; Schema: image; Owner: postgres
---
-
-ALTER TABLE ONLY img
-    ADD CONSTRAINT fk_img_gpano_metadata FOREIGN KEY (gpano) REFERENCES gpano_metadata(gid);
-
-
---
--- Name: fk_img_gps; Type: FK CONSTRAINT; Schema: image; Owner: postgres
---
-
-ALTER TABLE ONLY img
-    ADD CONSTRAINT fk_img_gps FOREIGN KEY (gps) REFERENCES gps(gid);
-
-
---
--- Name: fk_img_image_type; Type: FK CONSTRAINT; Schema: image; Owner: postgres
---
-
-ALTER TABLE ONLY img
-    ADD CONSTRAINT fk_img_image_type FOREIGN KEY (type) REFERENCES image_type(code);
-
 
 --
 -- PostgreSQL database dump complete
