@@ -662,9 +662,9 @@ SET default_with_oids = false;
 
 CREATE TABLE survey (
     gid serial PRIMARY KEY,
-    name character varying(100),
+    name character varying(100) UNIQUE,
     description character varying(255),
-    type character varying(100) UNIQUE,
+    type character varying(100),
     resp character varying(255)
 );
 
